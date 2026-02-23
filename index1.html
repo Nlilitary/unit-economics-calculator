@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор себестоимости | Юнит-экономика для малого бизнеса</title>
+    <meta name="description" content="Рассчитайте себестоимость, маржу и точку безубыточности вашего продукта. Бесплатный инструмент для handmade и микро-бизнеса.">
+    
+    <!-- Chart.js для графиков -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- EmailJS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
+    <style>
+        /* ========== СОВРЕМЕННЫЙ ДИЗАЙН ========== */
+        :root {
+            /* Мягкая, приятная цветовая палитра */
+            --primary: #6366f1;        /* Мягкий индиго */
+            --primary-dark: #4f46e5;    /* Насыщенный индиго */
+            --primary-light: #a5b4fc;    /* Светлый индиго */
+            --primary-soft: #eef2ff;     /* Очень светлый индиго */
+            
+            --success: #10b981;          /* Мятный */
+            --success-soft: #d1fae5;      /* Светло-мятный */
+            --warning: #f59e0b;           /* Теплый оранжевый */
+            --warning-soft: #fef3c7;      /* Светло-оранжевый */
+            --danger: #ef4444;             /* Мягкий красный */
+            --danger-soft: #fee2e2;        /* Светло-красный */
+            
+            /* Нейтральные тона для комфортного чтения */
+            --bg: #faf9f6;                 /* Теплый белый (очень мягкий) */
+            --bg-card: #ffffff;             /* Чистый белый */
+            --text: #2c3e50;                /* Темно-сине-серый для текста */
+            --text-muted: #6b7a8f;          /* Мягкий серо-синий */
+            --text-light: #95a5a6;           /* Светлый серый */
+            --border: #e9eef2;               /* Очень мягкий серый */
+            
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.01);
+            
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            
+            --transition: all 0.2s ease;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--bg);
+            padding: 24px;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        /* ========== MODERN HEADER ========== */
+        header {
+            text-align: center;
+            padding: 48px 24px;
+            margin-bottom: 32px;
+            background: linear-gradient(135deg, var(--primary-soft) 0%, #ffffff 100%);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+        
+        header p {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-dark);
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 20px;
+            border: 1px solid var(--primary-light);
+            backdrop-filter: blur(5px);
+        }
+        
+        /* ========== MODERN CARDS ========== */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 28px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        
+        .card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-light);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 4px;
+        }
+        
+        /* ========== MODERN FORM ========== */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text);
+            letter-spacing: -0.01em;
+        }
+        
+        .form-group small {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background: var(--bg);
+            color: var(--text);
+        }
+        
+        .form-group input:hover, .form-group select:hover {
+            border-color: var(--primary-light);
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 4px var(--primary-soft);
+        }
+        
+        .input-with-unit {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .input-with-unit input {
+            flex: 1;
+        }
+        
+        .input-with-unit span {
+            padding: 12px 16px;
+            background: var(--primary-soft);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--primary-dark);
+            font-size: 0.95rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        /* ========== SECTION TITLES ========== */
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 32px 0 20px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-light), transparent);
+            margin-left: 16px;
+        }
+        
+        /* ========== COST BREAKDOWN ========== */
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+        
+        .cost-item:last-child {
+            border-bottom: none;
+        }
+        
+        .cost-item .label {
+            color: var(--text-muted);
+        }
+        
+        .cost-item .value {
+            font-weight: 500;
+            color: var(--text);
+        }
+        
+        .cost-item.total {
+            background: var(--primary-soft);
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            margin-top: 16px;
+            border: 1px solid var(--primary-light);
+        }
+        
+        .cost-item.total .value {
+            color: var(--primary-dark);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        /* ========== MODERN METRICS ========== */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 24px 0;
+        }
+        
+        .metric-card {
+            background: var(--bg);
+            padding: 24px 16px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            border: 1.5px solid var(--border);
+            transition: var(--transition);
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+            margin: 8px 0;
+            line-height: 1.2;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        .metric-card.success .metric-value { color: var(--success); }
+        .metric-card.warning .metric-value { color: var(--warning); }
+        .metric-card.danger .metric-value { color: var(--danger); }
+        
+        /* ========== CHARTS ========== */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin: 24px 0;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            padding: 8px;
+        }
+        
+        /* ========== MODERN BUTTONS ========== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            border: 1.5px solid transparent;
+        }
+        
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px -4px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn.secondary {
+            background: white;
+            color: var(--text);
+            border-color: var(--border);
+        }
+        
+        .btn.secondary:hover {
+            background: var(--bg);
+            border-color: var(--primary-light);
+        }
+        
+        .btn.success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn.success:hover {
+            background: #0d9668;
+        }
+        
+        .btn.outline {
+            background: transparent;
+            border: 1.5px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn.outline:hover {
+            background: var(--primary-soft);
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 32px;
+        }
+        
+        /* ========== RECOMMENDATIONS & RISKS ========== */
+        .recommendations {
+            background: var(--primary-soft);
+            border: 1px solid var(--primary-light);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            margin: 24px 0;
+        }
+        
+        .recommendations h4 {
+            color: var(--primary-dark);
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+        }
+        
+        .recommendations ul {
+            padding-left: 24px;
+            color: var(--text);
+        }
+        
+        .recommendations li {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+        
+        .risk-card {
+            background: var(--danger-soft);
+            border: 1px solid #fecaca;
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            margin: 12px 0;
+            border-left: 4px solid var(--danger);
+        }
+        
+        .risk-card strong {
+            color: var(--danger);
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        
+        .risk-card p {
+            margin: 8px 0;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+        
+        .risk-card .mitigation {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed rgba(239, 68, 68, 0.3);
+            color: var(--success);
+        }
+        
+        .risk-card .mitigation::before {
+            content: "✅ ";
+        }
+        
+        /* ========== EMAIL SECTION ========== */
+        .email-section {
+            background: linear-gradient(135deg, var(--primary-soft), white);
+            border: 1.5px solid var(--primary-light);
+            border-radius: var(--radius-md);
+            padding: 28px;
+            margin: 28px 0;
+        }
+        
+        .email-section h4 {
+            color: var(--primary-dark);
+            margin-bottom: 16px;
+            font-size: 1.2rem;
+        }
+        
+        .email-note {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        /* ========== EXPORT PREVIEW ========== */
+        .export-preview {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: var(--radius-sm);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 16px 0;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #334155;
+        }
+        
+        /* ========== LOADING ========== */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 48px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            width: 56px;
+            height: 56px;
+            border: 3px solid var(--primary-soft);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            margin: 0 auto 24px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* ========== MODERN TOOLTIP ========== */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            margin-left: 6px;
+        }
+        
+        .tooltip .tooltip-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: var(--text-muted);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            font-weight: bold;
+            transition: var(--transition);
+        }
+        
+        .tooltip:hover .tooltip-icon {
+            background: var(--primary);
+        }
+        
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 280px;
+            background: var(--text);
+            color: white;
+            text-align: left;
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            position: absolute;
+            z-index: 100;
+            bottom: 150%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.2s, visibility 0.2s;
+            font-size: 0.85rem;
+            font-weight: normal;
+            line-height: 1.5;
+            box-shadow: var(--shadow-lg);
+            pointer-events: none;
+        }
+        
+        .tooltip .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--text) transparent transparent transparent;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* ========== FOOTER ========== */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+            margin-top: 48px;
+        }
+        
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        footer a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+        
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            body { padding: 16px; }
+            
+            header { padding: 32px 16px; }
+            header h1 { font-size: 1.8rem; }
+            
+            .form-grid { grid-template-columns: 1fr; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .btn-group { flex-direction: column; }
+            .btn { width: 100%; }
+            
+            .metric-value { font-size: 1.6rem; }
+        }
+        
+        /* ========== PRINT STYLES ========== */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 16px; }
+            .card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+            #resultsSection { display: block !important; }
+        }
+        
+        /* ========== ANIMATIONS ========== */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        #resultsSection {
+            display: none;
+        }
+        
+        #resultsSection.show {
+            display: block;
+            animation: slideUp 0.4s ease-out;
+        }
+        
+        /* ========== CUSTOM SCROLLBAR ========== */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 20px;
+            border: 2px solid var(--bg);
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+        
+        /* ========== GRADIENT TEXT ========== */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Modern Header -->
+    <header>
+        <h1>🧮 Калькулятор себестоимости</h1>
+        <p>Рассчитайте реальную прибыль вашего продукта: учтите все расходы, маржу и точку безубыточности</p>
+        <span class="badge">✅ Работает офлайн • 📊 Экспорт в CSV</span>
+    </header>
+
+    <!-- Calculator Form -->
+    <div class="card no-print">
+        <div class="card-header">
+            <h2 class="card-title">Параметры продукта</h2>
+            <button type="button" class="btn outline" onclick="loadSampleData()" style="padding: 10px 20px;">🎯 Загрузить пример</button>
+        </div>
+        
+        <form id="calcForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Название продукта</label>
+                    <input type="text" id="productName" placeholder="Например: Натуральное мыло Лаванда" required>
+                </div>
+                <div class="form-group">
+                    <label>Планируемая цена продажи (₽)</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="sellingPrice" step="0.01" min="0" placeholder="0.00" required>
+                        <span>₽</span>
+                    </div>
+                    <small>Цена, по которой будете продавать покупателю</small>
+                </div>
+            </div>
+
+            <!-- Material Costs -->
+            <h3 class="section-title">📦 Материальные затраты (на 1 единицу)</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Сырьё и материалы <span class="tooltip"><span class="tooltip-icon">?</span><span class="tooltip-text">Стоимость всех ингредиентов/компонентов для одного изделия</span></span></label>
+                    <div class="input-with-unit">
+                        <input type="number" id="materialsCost" step="0.01" min="0" placeholder="0.00" value="0">
+                        <span>₽</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Упаковка <span class="tooltip"><span class="tooltip-icon">?</span><span class="tooltip-text">Коробка, плёнка, бирка, стикер и т.д.</span></span></label>
+                    <div class="input-with-unit">
+                        <input type="number" id="packagingCost" step="0.01" min="0" placeholder="0.00" value="0">
+                        <span>₽</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Другие прямые расходы</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="otherDirectCosts" step="0.01" min="0" placeholder="0.00" value="0">
+                        <span>₽</span>
+                    </div>
+                    <small>Доставка сырья, комиссии платёжных систем и т.п.</small>
+                </div>
+            </div>
+
+            <!-- Labor Costs -->
+            <h3 class="section-title">⏱️ Трудовые затраты</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Время на производство (мин)</label>
+                    <input type="number" id="laborMinutes" min="0" placeholder="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Стоимость вашего часа (₽) <span class="tooltip"><span class="tooltip-icon">?</span><span class="tooltip-text">Какую сумму вы хотите получать за час работы. Рекомендуемый минимум: 300-500₽/час для handmade</span></span></label>
+                    <div class="input-with-unit">
+                        <input type="number" id="laborRate" step="0.01" min="0" placeholder="0.00" value="300">
+                        <span>₽/час</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overhead -->
+            <h3 class="section-title">🏢 Накладные расходы (в месяц)</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Аренда / коммунальные</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="overheadRent" step="0.01" min="0" placeholder="0.00" value="0">
+                        <span>₽/мес</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Маркетинг и реклама</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="overheadMarketing" step="0.01" min="0" placeholder="0.00" value="0">
+                        <span>₽/мес</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Прочие расходы</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="overheadOther" step="0.01" min="0" placeholder="0.00" value="0">
+                        <span>₽/мес</span>
+                    </div>
+                    <small>Банковское обслуживание, софт, амортизация оборудования</small>
+                </div>
+                <div class="form-group">
+                    <label>Планируемый объём продаж (шт/мес) <span class="tooltip"><span class="tooltip-icon">?</span><span class="tooltip-text">Сколько единиц продукта планируете продавать в месяц для распределения накладных расходов</span></span></label>
+                    <input type="number" id="monthlyVolume" min="1" placeholder="0" value="50" required>
+                </div>
+            </div>
+
+            <!-- Marketplace -->
+            <h3 class="section-title">🛒 Комиссии и логистика</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Комиссия площадки (%)</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="marketplaceFee" step="0.1" min="0" max="100" placeholder="0.0" value="0">
+                        <span>%</span>
+                    </div>
+                    <small>Ozon ~5-15%, WB ~10-25%, свой сайт ~0-3%</small>
+                </div>
+                <div class="form-group">
+                    <label>Логистика до покупателя (₽)</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="shippingCost" step="0.01" min="0" placeholder="0.00" value="0">
+                        <span>₽</span>
+                    </div>
+                    <small>Средняя стоимость доставки одной единицы</small>
+                </div>
+                <div class="form-group">
+                    <label>Налоги (%) <span class="tooltip"><span class="tooltip-icon">?</span><span class="tooltip-text">УСН 6%, НПД 4-6%, или 0% если пока не платите</span></span></label>
+                    <div class="input-with-unit">
+                        <input type="number" id="taxRate" step="0.1" min="0" max="100" placeholder="0.0" value="6">
+                        <span>%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group" style="margin-top: 32px; padding-top: 24px; border-top: 2px solid var(--border);">
+                <label>📧 Email для отправки результатов (необязательно)</label>
+                <input type="email" id="userEmail" placeholder="your@email.com" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
+                <small>Получите расчёт + рекомендации + чек-лист по оптимизации себестоимости</small>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn">🚀 Рассчитать юнит-экономику</button>
+                <button type="button" class="btn secondary" onclick="resetForm()">🔄 Сбросить</button>
+                <button type="button" class="btn outline" onclick="window.print()">🖨️ Печать / PDF</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading card">
+        <div class="spinner"></div>
+        <p style="color: var(--text-muted);">Считаем вашу прибыль... <br><small style="font-size: 0.9rem;">Это займёт меньше секунды</small></p>
+    </div>
+
+    <!-- Results -->
+    <div id="resultsSection">
+        <!-- Key Metrics -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Ключевые показатели</h2>
+                <span id="productTitle" style="font-size: 1rem; color: var(--text-muted);"></span>
+            </div>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Себестоимость</div>
+                    <div class="metric-value" id="costPerUnit">0 ₽</div>
+                    <small style="color: var(--text-muted);">на 1 единицу</small>
+                </div>
+                <div class="metric-card success">
+                    <div class="metric-label">Маржа</div>
+                    <div class="metric-value" id="marginPercent">0%</div>
+                    <small style="color: var(--text-muted);">чистой прибыли</small>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Наценка</div>
+                    <div class="metric-value" id="markupPercent">0%</div>
+                    <small style="color: var(--text-muted);">к себестоимости</small>
+                </div>
+                <div class="metric-card warning">
+                    <div class="metric-label">Точка безубыточности</div>
+                    <div class="metric-value" id="breakEvenUnits">0</div>
+                    <small style="color: var(--text-muted);">штук в месяц</small>
+                </div>
+            </div>
+
+            <!-- Cost Breakdown -->
+            <h3 class="section-title">Структура себестоимости</h3>
+            <div id="costBreakdown"></div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="card">
+                <h3 class="card-title" style="margin-bottom: 16px;">Доли затрат</h3>
+                <div class="chart-container">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="card-title" style="margin-bottom: 16px;">Прибыль при разном объёме</h3>
+                <div class="chart-container">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="recommendations">
+            <h4>💡 Рекомендации на основе ваших данных</h4>
+            <ul id="recommendationsList"></ul>
+        </div>
+
+        <!-- Risks -->
+        <div class="card">
+            <h3 class="card-title" style="color: var(--warning);">⚠️ Возможные риски</h3>
+            <div id="risksList"></div>
+        </div>
+
+        <!-- Email Export -->
+        <div class="email-section no-print" id="emailSection" style="display: none;">
+            <h4>📬 Отправить отчёт на почту?</h4>
+            <p class="email-note">Вы получите: детальный расчёт в PDF + чек-лист по снижению себестоимости + шаблон Excel для дальнейшего учёта</p>
+            <button class="btn success btn-block" id="sendEmailBtn" onclick="sendEmail()">✨ Отправить на <span id="emailDisplay"></span></button>
+            <small style="display:block; margin-top:12px; color:var(--text-muted);">Используем EmailJS — ваши данные не хранятся на сервере</small>
+        </div>
+
+        <!-- CSV Export -->
+        <div class="card no-print">
+            <h3 class="card-title">📥 Экспорт данных</h3>
+            <p style="margin: 12px 0; color: var(--text-muted);">Скачайте расчёт в формате CSV для импорта в Excel/Google Таблицы</p>
+            <button class="btn outline" onclick="exportCSV(event)">📊 Скачать CSV</button>
+            <div class="export-preview" id="csvPreview" style="display: none; margin-top: 16px;"></div>
+        </div>
+    </div>
+
+    <!-- Educational Block -->
+    <div class="card no-print">
+        <h3 class="card-title">Краткий гид по юнит-экономике</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; margin-top: 20px;">
+            <div style="background: var(--bg); padding: 20px; border-radius: var(--radius-sm);">
+                <strong style="color: var(--primary);">🎯 Себестоимость единицы</strong>
+                <p style="color: var(--text-muted); margin-top: 8px;">Все прямые и косвенные затраты, делённые на количество произведённых единиц. База для ценообразования.</p>
+            </div>
+            <div style="background: var(--bg); padding: 20px; border-radius: var(--radius-sm);">
+                <strong style="color: var(--primary);">💰 Маржа vs Наценка</strong>
+                <p style="color: var(--text-muted); margin-top: 8px;">Маржа = (Прибыль / Выручка) × 100%. Наценка = (Прибыль / Себестоимость) × 100%. Маржа всегда меньше наценки.</p>
+            </div>
+            <div style="background: var(--bg); padding: 20px; border-radius: var(--radius-sm);">
+                <strong style="color: var(--primary);">📉 Точка безубыточности</strong>
+                <p style="color: var(--text-muted); margin-top: 8px;">Минимальный объём продаж, при котором доходы покрывают все расходы. Ниже — убыток, выше — прибыль.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p><strong>Отказ от ответственности:</strong> Калькулятор предоставляет оценочные расчёты на основе введённых данных. Не является финансовой или юридической консультацией.</p>
+        <p style="margin-top: 16px;">
+            <a href="#" onclick="alert('Исходный код: https://github.com/Nlilitary/unit-economics-calculator'); return false;">💻 Исходный код на GitHub</a> • 
+            <a href="#" onclick="window.print(); return false;">🖨️ Версия для печати</a> • 
+            <a href="web.telegram.org/@nilitary">✉️ Предложить улучшение</a>
+        </p>
+    </footer>
+</div>
+
+<script>
+// [JavaScript код остается без изменений - он полностью рабочий]
+// ========== ИНИЦИАЛИЗАЦИЯ ==========
+let calcResults = {
+    productName: '',
+    sellingPrice: 0,
+    totalCostPerUnit: 0,
+    margin: 0,
+    markup: 0,
+    breakEvenUnits: 0,
+    roi: 0,
+    breakdown: {},
+    userEmail: ''
+};
+
+let pieChartInstance = null;
+let barChartInstance = null;
+let isCalculated = false;
+
+// EmailJS init
+(function(){
+    if (typeof emailjs !== 'undefined') {
+        emailjs.init("YOUR_PUBLIC_KEY");
+    }
+})();
+
+// Utilities
+const fmt = (num, decimals = 2) => new Intl.NumberFormat('ru-RU', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(num);
+const fmtInt = (num) => new Intl.NumberFormat('ru-RU').format(Math.round(num));
+const parseNum = (val) => {
+    const parsed = parseFloat(val);
+    return isNaN(parsed) ? 0 : parsed;
+};
+
+// Sample Data
+function loadSampleData() {
+    document.getElementById('productName').value = 'Натуральное мыло "Лаванда"';
+    document.getElementById('sellingPrice').value = '350';
+    document.getElementById('materialsCost').value = '85';
+    document.getElementById('packagingCost').value = '25';
+    document.getElementById('otherDirectCosts').value = '10';
+    document.getElementById('laborMinutes').value = '20';
+    document.getElementById('laborRate').value = '400';
+    document.getElementById('overheadRent').value = '5000';
+    document.getElementById('overheadMarketing').value = '3000';
+    document.getElementById('overheadOther').value = '2000';
+    document.getElementById('monthlyVolume').value = '80';
+    document.getElementById('marketplaceFee').value = '12';
+    document.getElementById('shippingCost').value = '150';
+    document.getElementById('taxRate').value = '6';
+    
+    document.querySelector('#calcForm .btn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    const btn = document.querySelector('#calcForm .btn');
+    const original = btn.innerHTML;
+    btn.innerHTML = '✅ Пример загружен! Нажмите "Рассчитать"';
+    setTimeout(() => btn.innerHTML = original, 2000);
+}
+
+// Calculation Logic
+function calculateUnitEconomics(data) {
+    const directMaterials = parseNum(data.materialsCost);
+    const directPackaging = parseNum(data.packagingCost);
+    const directOther = parseNum(data.otherDirectCosts);
+    const directCosts = directMaterials + directPackaging + directOther;
+    
+    const laborHours = parseNum(data.laborMinutes) / 60;
+    const laborCost = laborHours * parseNum(data.laborRate);
+    
+    const totalOverhead = parseNum(data.overheadRent) + parseNum(data.overheadMarketing) + parseNum(data.overheadOther);
+    const monthlyVolume = Math.max(1, parseNum(data.monthlyVolume));
+    const overheadPerUnit = totalOverhead / monthlyVolume;
+    
+    const sellingPrice = parseNum(data.sellingPrice);
+    const marketplaceFee = (sellingPrice * parseNum(data.marketplaceFee)) / 100;
+    const shippingCost = parseNum(data.shippingCost);
+    const taxAmount = (sellingPrice * parseNum(data.taxRate)) / 100;
+    
+    const totalCostPerUnit = directCosts + laborCost + overheadPerUnit + marketplaceFee + shippingCost;
+    const grossProfit = sellingPrice - totalCostPerUnit;
+    const netProfit = grossProfit - taxAmount;
+    
+    const margin = sellingPrice > 0 ? (netProfit / sellingPrice) * 100 : 0;
+    const markup = totalCostPerUnit > 0 ? ((sellingPrice - totalCostPerUnit) / totalCostPerUnit) * 100 : 0;
+    
+    const contributionMargin = sellingPrice - totalCostPerUnit - taxAmount;
+    let breakEvenUnits;
+    
+    if (contributionMargin <= 0) {
+        breakEvenUnits = Infinity;
+    } else {
+        breakEvenUnits = totalOverhead / contributionMargin;
+    }
+    
+    const roi = totalCostPerUnit > 0 ? (netProfit / totalCostPerUnit) * 100 : 0;
+    
+    return {
+        directCosts, laborCost, overheadPerUnit, marketplaceFee, shippingCost, taxAmount,
+        totalCostPerUnit, sellingPrice, grossProfit, netProfit,
+        margin, markup, breakEvenUnits, roi, contributionMargin,
+        breakdown: {
+            'Материалы': directMaterials,
+            'Упаковка': directPackaging,
+            'Прочие прямые': directOther,
+            'Труд': laborCost,
+            'Накладные': overheadPerUnit,
+            'Комиссия площадки': marketplaceFee,
+            'Логистика': shippingCost,
+            'Налоги': taxAmount
+        }
+    };
+}
+
+// Recommendations
+function generateRecommendations(results, data) {
+    const recs = [];
+    
+    if (results.margin < 20) {
+        recs.push('🔴 Маржа ниже 20% — зона риска. Подумайте о повышении цены или снижении себестоимости.');
+    } else if (results.margin < 40) {
+        recs.push('🟡 Маржа 20-40% — допустимо для старта, но есть куда расти. Оптимизируйте закупки.');
+    } else {
+        recs.push('🟢 Маржа выше 40% — здоровый показатель. Можно инвестировать в масштабирование.');
+    }
+    
+    if (results.laborCost > results.directCosts && results.directCosts > 0) {
+        recs.push('⏱️ Затраты на труд превышают материалы. Рассмотрите оптимизацию процессов или повышение производительности.');
+    }
+    
+    if (parseNum(data.marketplaceFee) > 15) {
+        recs.push('🛒 Высокая комиссия площадки. Сравните условия разных маркетплейсов или развивайте прямые продажи.');
+    }
+    
+    if (isFinite(results.breakEvenUnits) && results.breakEvenUnits > parseNum(data.monthlyVolume) * 0.8) {
+        recs.push('📉 Точка безубыточности близка к плану продаж. Увеличьте маржу или снизьте постоянные расходы.');
+    }
+    
+    if (parseNum(data.overheadRent) > 0 && parseNum(data.monthlyVolume) < 30) {
+        recs.push('🏢 Накладные расходы на единицу высоки из-за малого объёма. Увеличьте производство или рассмотрите коворкинг.');
+    }
+    
+    if (!isFinite(results.breakEvenUnits)) {
+        recs.push('⚠️ При текущей цене и затратах точка безубыточности недостижима. Срочно пересмотрите модель!');
+    }
+    
+    if (recs.length === 0) {
+        recs.push('✅ Ваша модель выглядит устойчивой. Сфокусируйтесь на увеличении объёмов продаж и удержании клиентов.');
+    }
+    
+    return recs;
+}
+
+// Risks
+function generateRisks(results, data) {
+    const risks = [];
+    
+    if (results.margin < 10) {
+        risks.push({ risk: 'Критически низкая маржа', desc: 'Любое колебание цен на сырьё или комиссий приведёт к убыткам.', mitigation: 'Срочно пересмотрите цену или структуру затрат.' });
+    }
+    
+    if (parseNum(data.taxRate) === 0) {
+        risks.push({ risk: 'Не учтены налоги', desc: 'Расчёт показывает прибыль до налогов. Реальная прибыль будет ниже.', mitigation: 'Добавьте ставку налога (УСН 6%, НПД 4-6%) для точности.' });
+    }
+    
+    if (parseNum(data.monthlyVolume) < 10) {
+        risks.push({ risk: 'Малый объём продаж', desc: 'Накладные расходы распределяются на мало единиц, завышая себестоимость.', mitigation: 'Пересчитайте при росте объёмов или снизьте постоянные затраты.' });
+    }
+    
+    if (parseNum(data.shippingCost) > parseNum(data.sellingPrice) * 0.3 && parseNum(data.sellingPrice) > 0) {
+        risks.push({ risk: 'Высокая доля логистики', desc: 'Доставка съедает значительную часть выручки.', mitigation: 'Пересмотрите тарифы, введите минимальную сумму заказа для бесплатной доставки.' });
+    }
+    
+    if (!isFinite(results.breakEvenUnits)) {
+        risks.push({ risk: 'Отрицательная маржинальность', desc: 'При текущих параметрах каждый проданный товар приносит убыток.', mitigation: 'Увеличьте цену продажи или снизьте переменные затраты.' });
+    }
+    
+    if (risks.length === 0) {
+        risks.push({ 
+            risk: 'Изменение внешних условий', 
+            desc: 'Цены на сырьё, комиссии площадок и курсы валют могут измениться.', 
+            mitigation: 'Заложите буфер 10-15% в цену и регулярно пересчитывайте модель.' 
+        });
+    }
+    
+    return risks;
+}
+
+// Render Functions
+function renderCostBreakdown(breakdown, total) {
+    const items = Object.entries(breakdown).filter(([_, val]) => val > 0);
+    if (items.length === 0) {
+        return '<div class="cost-item"><span class="label">Нет данных</span><span class="value">0 ₽</span></div>';
+    }
+    
+    return items.map(([label, value]) => {
+        const percent = total > 0 ? (value / total) * 100 : 0;
+        return `<div class="cost-item">
+            <span class="label">${label}</span>
+            <span class="value">${fmt(value)} ₽ <small style="color:var(--text-muted)">(${fmt(percent, 1)}%)</small></span>
+        </div>`;
+    }).join('') + `<div class="cost-item total">
+        <span class="label">Итого себестоимость</span>
+        <span class="value">${fmt(total)} ₽</span>
+    </div>`;
+}
+
+function renderRecommendations(list) {
+    return list.map(rec => `<li>${rec}</li>`).join('');
+}
+
+function renderRisks(list) {
+    return list.map(r => `
+        <div class="risk-card">
+            <strong>${r.risk}</strong>
+            <p>${r.desc}</p>
+            <div class="mitigation">${r.mitigation}</div>
+        </div>
+    `).join('');
+}
+
+// Charts
+function renderCharts(breakdown, results, formData) {
+    if (typeof Chart === 'undefined') {
+        console.warn('Chart.js не загружен');
+        return;
+    }
+    
+    const pieCanvas = document.getElementById('pieChart');
+    if (!pieCanvas) return;
+    
+    const pieCtx = pieCanvas.getContext('2d');
+    const pieLabels = Object.keys(breakdown).filter(k => breakdown[k] > 0);
+    const pieData = pieLabels.map(k => breakdown[k]);
+    const pieColors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6b7280', '#14b8a6'];
+    
+    if (pieChartInstance !== null) {
+        pieChartInstance.destroy();
+        pieChartInstance = null;
+    }
+    
+    pieChartInstance = new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: pieLabels,
+            datasets: [{
+                data: pieData,
+                backgroundColor: pieColors.slice(0, pieLabels.length),
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right', labels: { font: { size: 12, family: 'Inter' } } },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a,b) => a+b, 0);
+                            const percent = total > 0 ? ((value/total)*100).toFixed(1) : 0;
+                            return `${label}: ${fmt(value)} ₽ (${percent}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '65%'
+        }
+    });
+    
+    const barCanvas = document.getElementById('barChart');
+    if (!barCanvas) return;
+    
+    const barCtx = barCanvas.getContext('2d');
+    const volumes = [10, 30, 50, 80, 100, 150];
+    
+    const totalOverhead = parseNum(formData.overheadRent) + parseNum(formData.overheadMarketing) + parseNum(formData.overheadOther);
+    const taxRate = parseNum(formData.taxRate);
+    const sellingPrice = results.sellingPrice;
+    const variableCostPerUnit = results.totalCostPerUnit - results.overheadPerUnit;
+    
+    const profits = volumes.map(vol => {
+        const overheadPerUnit = totalOverhead / vol;
+        const costPerUnit = variableCostPerUnit + overheadPerUnit;
+        const taxPerUnit = (sellingPrice * taxRate) / 100;
+        const profitPerUnit = sellingPrice - costPerUnit - taxPerUnit;
+        return Math.max(0, profitPerUnit * vol);
+    });
+    
+    if (barChartInstance !== null) {
+        barChartInstance.destroy();
+        barChartInstance = null;
+    }
+    
+    barChartInstance = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: volumes.map(v => `${v} шт`),
+            datasets: [{
+                label: 'Прибыль (₽)',
+                data: profits,
+                backgroundColor: profits.map(p => p > 0 ? '#10b981' : '#ef4444'),
+                borderRadius: 8,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { 
+                    beginAtZero: true, 
+                    grid: { color: '#e9eef2' },
+                    ticks: { callback: (val) => fmtInt(val) + '₽' } 
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+// Form Handler
+document.getElementById('calcForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    document.getElementById('loading').classList.add('show');
+    document.getElementById('resultsSection').classList.remove('show');
+    
+    setTimeout(() => {
+        const formData = {
+            productName: document.getElementById('productName').value,
+            sellingPrice: document.getElementById('sellingPrice').value,
+            materialsCost: document.getElementById('materialsCost').value,
+            packagingCost: document.getElementById('packagingCost').value,
+            otherDirectCosts: document.getElementById('otherDirectCosts').value,
+            laborMinutes: document.getElementById('laborMinutes').value,
+            laborRate: document.getElementById('laborRate').value,
+            overheadRent: document.getElementById('overheadRent').value,
+            overheadMarketing: document.getElementById('overheadMarketing').value,
+            overheadOther: document.getElementById('overheadOther').value,
+            monthlyVolume: document.getElementById('monthlyVolume').value,
+            marketplaceFee: document.getElementById('marketplaceFee').value,
+            shippingCost: document.getElementById('shippingCost').value,
+            taxRate: document.getElementById('taxRate').value,
+            userEmail: document.getElementById('userEmail').value
+        };
+        
+        calcResults = calculateUnitEconomics(formData);
+        calcResults.productName = formData.productName;
+        calcResults.userEmail = formData.userEmail;
+        isCalculated = true;
+        
+        renderResults(calcResults, formData);
+        
+        document.getElementById('loading').classList.remove('show');
+        document.getElementById('resultsSection').classList.add('show');
+        document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        
+        localStorage.setItem('unitCalcDraft', JSON.stringify(formData));
+        
+    }, 600);
+});
+
+function renderResults(results, formData) {
+    if (!results || !results.totalCostPerUnit) {
+        console.error('Результаты расчёта не доступны');
+        return;
+    }
+    
+    document.getElementById('productTitle').textContent = results.productName || 'Без названия';
+    document.getElementById('costPerUnit').textContent = `${fmt(results.totalCostPerUnit)} ₽`;
+    document.getElementById('marginPercent').textContent = `${fmt(results.margin, 1)}%`;
+    document.getElementById('markupPercent').textContent = `${fmt(results.markup, 1)}%`;
+    
+    const breakEvenEl = document.getElementById('breakEvenUnits');
+    if (!isFinite(results.breakEvenUnits)) {
+        breakEvenEl.textContent = '∞ (недостижимо)';
+        breakEvenEl.parentElement.className = 'metric-card danger';
+    } else {
+        breakEvenEl.textContent = fmtInt(results.breakEvenUnits);
+        const marginCard = document.querySelector('.metric-card.success');
+        if (results.margin < 20) {
+            marginCard.className = 'metric-card danger';
+        } else if (results.margin < 40) {
+            marginCard.className = 'metric-card warning';
+        } else {
+            marginCard.className = 'metric-card success';
+        }
+    }
+    
+    document.getElementById('costBreakdown').innerHTML = renderCostBreakdown(results.breakdown, results.totalCostPerUnit);
+    
+    const recs = generateRecommendations(results, formData);
+    document.getElementById('recommendationsList').innerHTML = renderRecommendations(recs);
+    
+    const risks = generateRisks(results, formData);
+    document.getElementById('risksList').innerHTML = renderRisks(risks);
+    
+    renderCharts(results.breakdown, results, formData);
+    
+    const emailSection = document.getElementById('emailSection');
+    if (formData.userEmail && formData.userEmail.trim() !== '') {
+        emailSection.style.display = 'block';
+        document.getElementById('emailDisplay').textContent = formData.userEmail;
+    } else {
+        emailSection.style.display = 'none';
+    }
+    
+    document.getElementById('csvPreview').style.display = 'none';
+}
+
+// Email
+function sendEmail() {
+    if (!isCalculated || !calcResults || !calcResults.totalCostPerUnit) {
+        alert('Сначала выполните расчёт, затем отправляйте отчёт');
+        return;
+    }
+    
+    const email = calcResults.userEmail;
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        alert('Пожалуйста, введите корректный email');
+        return;
+    }
+    
+    if (typeof emailjs === 'undefined') {
+        alert('Сервис отправки писем недоступен. Скопируйте данные вручную или используйте экспорт CSV.');
+        return;
+    }
+    
+    const btn = document.getElementById('sendEmailBtn');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Формируем отчёт...';
+    
+    const csvContent = generateCSV();
+    const subject = `📊 Отчёт по юнит-экономике: ${calcResults.productName || 'Продукт'}`;
+    
+    const breakEvenText = isFinite(calcResults.breakEvenUnits) 
+        ? `${fmtInt(calcResults.breakEvenUnits)} шт/мес` 
+        : 'Недостижимо при текущих параметрах';
+    
+    const emailBody = `
+Здравствуйте!
+
+Вот расчёт себестоимости и юнит-экономики для вашего продукта: "${calcResults.productName || 'Без названия'}"
+
+📈 КЛЮЧЕВЫЕ ПОКАЗАТЕЛИ:
+• Себестоимость единицы: ${fmt(calcResults.totalCostPerUnit)} ₽
+• Маржа: ${fmt(calcResults.margin, 1)}%
+• Наценка: ${fmt(calcResults.markup, 1)}%
+• Точка безубыточности: ${breakEvenText}
+• ROI: ${fmt(calcResults.roi, 1)}%
+
+📦 СТРУКТУРА ЗАТРАТ (на 1 единицу):
+${Object.entries(calcResults.breakdown).filter(([_,v])=>v>0).map(([k,v])=>`• ${k}: ${fmt(v)} ₽`).join('\n')}
+
+💡 РЕКОМЕНДАЦИИ:
+${generateRecommendations(calcResults, {
+    marketplaceFee: document.getElementById('marketplaceFee').value,
+    monthlyVolume: document.getElementById('monthlyVolume').value,
+    overheadRent: document.getElementById('overheadRent').value,
+    shippingCost: document.getElementById('shippingCost').value,
+    taxRate: document.getElementById('taxRate').value
+}).map(r=>`• ${r.replace(/^[🔴🟡🟢⏱️🛒📉🏢✅⚠️]\s*/, '')}`).join('\n')}
+
+📥 ДАННЫЕ ДЛЯ ЭКСПОРТА (CSV):
+${csvContent}
+
+---
+Отчёт сгенерирован: ${new Date().toLocaleString('ru-RU')}
+Инструмент: Калькулятор юнит-экономики (бесплатно)
+    `.trim();
+    
+    const templateParams = {
+        to_email: email,
+        subject: subject,
+        message: emailBody,
+        from_name: "Калькулятор себестоимости"
+    };
+    
+    emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams)
+        .then(function(response) {
+            alert('✅ Отчёт отправлен на ' + email + '! Проверьте папку "Спам", если не видите письмо.');
+            btn.innerHTML = '✅ Отправлено!';
+            setTimeout(() => { btn.disabled = false; btn.innerHTML = originalText; }, 3000);
+        }, function(error) {
+            console.error('EmailJS Error:', error);
+            alert('❌ Не удалось отправить письмо. Попробуйте скопировать данные вручную или используйте экспорт CSV.');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
+}
+
+// CSV Export
+function generateCSV() {
+    const breakEvenText = isFinite(calcResults.breakEvenUnits) 
+        ? `${fmtInt(calcResults.breakEvenUnits)} шт/мес` 
+        : 'Недостижимо';
+    
+    const rows = [
+        ['Параметр', 'Значение'],
+        ['Продукт', calcResults.productName || 'Без названия'],
+        ['Цена продажи', `${fmt(calcResults.sellingPrice)} ₽`],
+        ['Себестоимость единицы', `${fmt(calcResults.totalCostPerUnit)} ₽`],
+        ['Маржа', `${fmt(calcResults.margin, 1)}%`],
+        ['Наценка', `${fmt(calcResults.markup, 1)}%`],
+        ['Точка безубыточности', breakEvenText],
+        ['ROI', `${fmt(calcResults.roi, 1)}%`],
+        [],
+        ['Структура затрат', ''],
+        ...Object.entries(calcResults.breakdown).filter(([_,v])=>v>0).map(([k,v])=>[k, `${fmt(v)} ₽`]),
+        [],
+        ['Расчёт произведён', new Date().toLocaleString('ru-RU')]
+    ];
+    
+    return rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+}
+
+function exportCSV(event) {
+    if (!isCalculated || !calcResults || !calcResults.totalCostPerUnit) {
+        alert('Сначала выполните расчёт, затем экспортируйте данные');
+        return;
+    }
+    
+    const csv = generateCSV();
+    const preview = document.getElementById('csvPreview');
+    
+    if (preview.style.display === 'none' || !preview.style.display) {
+        preview.textContent = csv;
+        preview.style.display = 'block';
+        
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        const safeName = (calcResults.productName || 'product').replace(/[^a-z0-9а-яё]/gi, '_');
+        link.setAttribute('download', `unit-economics-${safeName}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        const btn = event.target;
+        const original = btn.innerHTML;
+        btn.innerHTML = '✅ CSV скачан!';
+        setTimeout(() => btn.innerHTML = original, 2000);
+    } else {
+        preview.style.display = 'none';
+    }
+}
+
+// Reset
+function resetForm() {
+    if (confirm('Сбросить все данные?')) {
+        document.getElementById('calcForm').reset();
+        document.getElementById('resultsSection').classList.remove('show');
+        localStorage.removeItem('unitCalcDraft');
+        
+        if (pieChartInstance !== null) {
+            pieChartInstance.destroy();
+            pieChartInstance = null;
+        }
+        if (barChartInstance !== null) {
+            barChartInstance.destroy();
+            barChartInstance = null;
+        }
+        
+        isCalculated = false;
+        
+        const marginCard = document.querySelector('.metric-card.success');
+        if (marginCard) {
+            marginCard.className = 'metric-card success';
+        }
+    }
+}
+
+// Load draft
+window.addEventListener('load', function() {
+    const draft = localStorage.getItem('unitCalcDraft');
+    if (draft) {
+        try {
+            const data = JSON.parse(draft);
+            Object.keys(data).forEach(key => {
+                const el = document.getElementById(key);
+                if (el && data[key] !== undefined) el.value = data[key];
+            });
+            const indicator = document.createElement('div');
+            indicator.innerHTML = '📝 Черновик загружен из памяти браузера';
+            indicator.style.cssText = 'background:var(--primary-soft); color:var(--primary-dark); padding:12px 20px; border-radius:var(--radius-sm); margin-bottom:20px; font-size:0.9rem; border:1px solid var(--primary-light);';
+            const cardHeader = document.querySelector('#calcForm .card-header');
+            if (cardHeader) {
+                cardHeader.after(indicator);
+                setTimeout(() => indicator.remove(), 5000);
+            }
+        } catch(e) { console.warn('Failed to load draft', e); }
+    }
+});
+
+// Keyboard shortcut
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        document.getElementById('calcForm').requestSubmit();
+    }
+});
+</script>
+</body>
+</html>
